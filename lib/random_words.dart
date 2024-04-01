@@ -8,7 +8,7 @@ class RandomWords extends StatefulWidget {
 
 class RandomWordsState extends State<RandomWords> {
   final _randomWordPairs = <WordPair>[];
-  // final _savedWordPairs = Set<WordPair>();
+  final _savedWordPairs = Set<WordPair>();
 
   Widget _buildList() {
     return ListView.builder(
@@ -26,11 +26,40 @@ class RandomWordsState extends State<RandomWords> {
   }
 
   Widget _buildRow(WordPair pair) {
+    final _alreadySaved = _savedWordPairs.contains(pair);
     return ListTile(
-        title: Text(
-      pair.asPascalCase,
-      style: TextStyle(fontSize: 18),
-    ));
+      title: Text(
+        pair.asPascalCase,
+        style: TextStyle(fontSize: 18.0),
+      ),
+      trailing: Icon(_alreadySaved ? Icons.favorite : Icons.favorite_border,
+          color: _alreadySaved ? Colors.red : null),
+      onTap: () {
+        setState(() {
+          if (_alreadySaved) {
+            _savedWordPairs.remove(pair);
+          } else {
+            _savedWordPairs.add(pair);
+          }
+        });
+      },
+    );
+  }
+
+  void _pushSaved() {
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (BuildContext context) { 
+          final Iterable<ListTile> tiles = _savedWordPairs.map((WordPair pair){
+            return ListTile(title: Text(pair.asPascalCase, style: TextStyle(fontSize: 16.0),));
+
+          });
+        
+        final List<Widget> divided = ListTile.divideTiles(context: context, tiles: tiles).toList();
+
+        return Scaffold(appBar: AppBar(title: Text('Saved WordPairs', style: TextStyle(color: Colors.white)), centerTitle: true, backgroundColor: Colors.purple, foregroundColor: Colors.white,
+      ),body: ListView(children: divided,),);
+        })
+      );
   }
 
   Widget build(BuildContext context) {
@@ -40,6 +69,14 @@ class RandomWordsState extends State<RandomWords> {
           'WordPair Generator',
           style: TextStyle(color: Color.fromRGBO(255, 255, 255, 1)),
         ),
+        actions: <Widget>[
+          IconButton(
+              onPressed: _pushSaved,
+              icon: Icon(
+                Icons.list,
+                color: Colors.white,
+              ))
+        ],
         centerTitle: true,
         backgroundColor: Colors.purple,
       ),
